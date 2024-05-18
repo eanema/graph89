@@ -7,6 +7,12 @@ It was forked from the [last version distributed by the original author](https:/
 
 Kudos to him and everyone involved in the TI emulation projects, especially the TiEmu and TilEm developers.
 
+[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
+     alt="Get it on F-Droid"
+     height="80">](https://f-droid.org/packages/com.eanema.graph89/)
+
+Or download the latest APK from the [Releases Section](https://github.com/eanema/graph89/releases/latest).
+
 ## This Fork
 
 This is a fork from https://github.com/milaq/graph89 to add support for 64-bit android/x86 platforms. 
