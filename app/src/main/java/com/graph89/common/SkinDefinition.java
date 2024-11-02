@@ -130,26 +130,24 @@ public class SkinDefinition
 					MaskPath = "landscape/ti84classic/buttonmask.bin";
 					ButtonLocationPath = "landscape/ti84classic/buttonloaction.location";
 					InfoPath = "landscape/ti84classic/info";
-					
 					Orientation = SkinBase.ORIENTATION_LANDSCAPE;
 				}
 				break;
 			case SkinDefinition.BUILD_IN_TI84_MINIMAL:
 				if (isPortrait)
 				{
-					ImagePath = "portrait/ti84classic/skin.jpg";
-					MaskPath = "portrait/ti84classic/buttonmask.bin";
-					ButtonLocationPath = "portrait/ti84classic/buttonloaction.location";
-					InfoPath = "portrait/ti84classic/info";
+					ImagePath = "portrait/ti84minimal/skin.jpg";
+					MaskPath = "portrait/ti84minimal/buttonmask.bin";
+					ButtonLocationPath = "portrait/ti84minimal/buttonloaction.location";
+					InfoPath = "portrait/ti84minimal/info";
 					Orientation = SkinBase.ORIENTATION_PORTRAIT;
 				}
 				else
 				{
-					ImagePath = "landscape/ti84classic/skin.jpg";
-					MaskPath = "landscape/ti84classic/buttonmask.bin";
-					ButtonLocationPath = "landscape/ti84classic/buttonloaction.location";
-					InfoPath = "landscape/ti84classic/info";
-					
+					ImagePath = "landscape/ti84minimal/skin.jpg";
+					MaskPath = "landscape/ti84minimal/buttonmask.bin";
+					ButtonLocationPath = "landscape/ti84minimal/buttonloaction.location";
+					InfoPath = "landscape/ti84minimal/info";
 					Orientation = SkinBase.ORIENTATION_LANDSCAPE;
 				}
 				break;
@@ -173,7 +171,7 @@ public class SkinDefinition
 			case SkinDefinition.BUILD_IN_TI84_CLASSIC:
 				return "Classic 84";
 			case SkinDefinition.BUILD_IN_TI84_MINIMAL:
-				return "Minimal 84"
+				return "Minimal 84";
 		}
 
 		if (id == SkinDefinition.BUILD_IN_UNKNOWN)
