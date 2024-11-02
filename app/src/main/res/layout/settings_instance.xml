@@ -56,7 +56,7 @@
             android:key="CONF_SKIN_V200"
             android:title="Skin" />
         
-               <ListPreference
+        <ListPreference
             android:defaultValue="Classic 84"
             android:entries="@array/skin84Array"
             android:entryValues="@array/skin84Values"
