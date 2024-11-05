@@ -1,0 +1,5 @@
+screen: 0 0 708 468
+mask: 708 430
+backgroundcolor: FF2F3C4D
+lcdpixeloff: FFB6C5B7
+lcdpixelon: FF000000

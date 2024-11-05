@@ -1,9 +1,11 @@
 <resources>
     <string-array name="skin84Array">
         <item>Classic 84</item>
+        <item>Minimal 84</item>
     </string-array>
 
     <string-array name="skin84Values">
         <item>Classic 84</item>
+        <item>Minimal 84</item>
     </string-array>
 </resources>

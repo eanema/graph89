@@ -32,6 +32,7 @@ public class SkinDefinition
 	public static final int	BUILD_IN_LANDSCAPE_V200_CLASSIC		= 4;
 	public static final int	BUILD_IN_LANDSCAPE_TI92P_CLASSIC	= 5;
 	public static final int	BUILD_IN_TI84_CLASSIC				= 6;
+	public static final int	BUILD_IN_TI84_MINIMAL				= 7;
 
 	public int				Orientation							= SkinBase.ORIENTATION_UNKNOWN;
 
@@ -129,7 +130,24 @@ public class SkinDefinition
 					MaskPath = "landscape/ti84classic/buttonmask.bin";
 					ButtonLocationPath = "landscape/ti84classic/buttonloaction.location";
 					InfoPath = "landscape/ti84classic/info";
-					
+					Orientation = SkinBase.ORIENTATION_LANDSCAPE;
+				}
+				break;
+			case SkinDefinition.BUILD_IN_TI84_MINIMAL:
+				if (isPortrait)
+				{
+					ImagePath = "portrait/ti84minimal/skin.jpg";
+					MaskPath = "portrait/ti84minimal/buttonmask.bin";
+					ButtonLocationPath = "portrait/ti84minimal/buttonloaction.location";
+					InfoPath = "portrait/ti84minimal/info";
+					Orientation = SkinBase.ORIENTATION_PORTRAIT;
+				}
+				else
+				{
+					ImagePath = "landscape/ti84minimal/skin.jpg";
+					MaskPath = "landscape/ti84minimal/buttonmask.bin";
+					ButtonLocationPath = "landscape/ti84minimal/buttonloaction.location";
+					InfoPath = "landscape/ti84minimal/info";
 					Orientation = SkinBase.ORIENTATION_LANDSCAPE;
 				}
 				break;
@@ -152,6 +170,8 @@ public class SkinDefinition
 				return "Classic V200";
 			case SkinDefinition.BUILD_IN_TI84_CLASSIC:
 				return "Classic 84";
+			case SkinDefinition.BUILD_IN_TI84_MINIMAL:
+				return "Minimal 84";
 		}
 
 		if (id == SkinDefinition.BUILD_IN_UNKNOWN)
@@ -198,6 +218,10 @@ public class SkinDefinition
 		else if (name.equals("Classic 84"))
 		{
 			return SkinDefinition.BUILD_IN_TI84_CLASSIC;
+		}
+		else if (name.equals("Minimal 84"))
+		{
+			return SkinDefinition.BUILD_IN_TI84_MINIMAL;
 		}
 		if (calcType == CalculatorTypes.TI89 || calcType == CalculatorTypes.TI89T)
 		{
