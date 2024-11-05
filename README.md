@@ -11,7 +11,7 @@ Kudos to him and everyone involved in the TI emulation projects, especially the 
      alt="Get it on F-Droid"
      height="80">](https://f-droid.org/packages/com.eanema.graph89/)
 
-Or download the latest APK from the [Releases Section](https://github.com/eanema/graph89/releases/latest).
+I am no longer maintaining binary releases here. Please look for the latest binary release in the [F-Droid build](https://f-droid.org/en/packages/com.eanema.graph89/) repo
 
 ## This Fork
 
