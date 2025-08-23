@@ -53,17 +53,18 @@ public class ActionsList extends ListView
 	public static List<ListItem>	ActionEntries			= null;
 
 	public static final int			SHOW_KEYBOARD			= 0;
-	public static final int			INSTALL_APPS			= 1;
-	public static final int			TAKE_SCREENSHOT			= 2;
-	public static final int			SYNCHRONIZE_CLOCK		= 3;
-	public static final int			LOAD_STATE				= 4;
-	public static final int			SAVE_STATE				= 5;
-	public static final int			RESET					= 6;
-	public static final int			BACKUP_MANAGER			= 7;
-	public static final int			ROM_MANAGER				= 8;
-	public static final int 		INSTANCE_CONFIGURATION	= 9;
-	public static final int			GLOBAL_CONFIGURATION	= 10;
-	public static final int			ABOUT					= 11;
+	public static final int			SEND_ON_KEY_PRESS		= 1;
+	public static final int			INSTALL_APPS			= 2;
+	public static final int			TAKE_SCREENSHOT			= 3;
+	public static final int			SYNCHRONIZE_CLOCK		= 4;
+	public static final int			LOAD_STATE				= 5;
+	public static final int			SAVE_STATE				= 6;
+	public static final int			RESET					= 7;
+	public static final int			BACKUP_MANAGER			= 8;
+	public static final int			ROM_MANAGER				= 9;
+	public static final int 		INSTANCE_CONFIGURATION	= 10;
+	public static final int			GLOBAL_CONFIGURATION	= 11;
+	public static final int			ABOUT					= 12;
 
 	private Context					mContext				= null;
 	private ListViewAdapter			mAdapter				= null;
@@ -72,6 +73,7 @@ public class ActionsList extends ListView
 	{
 		ActionEntries = new ArrayList<ListItem>();
 		ActionEntries.add(new ListItem(SHOW_KEYBOARD, "Show Keyboard"));
+		ActionEntries.add(new ListItem(SEND_ON_KEY_PRESS, "Send Break (ON Key Press)"));
 		ActionEntries.add(new ListItem(INSTALL_APPS, "Install Application / Send Files"));
 		ActionEntries.add(new ListItem(TAKE_SCREENSHOT, "Take Screenshot"));
 		ActionEntries.add(new ListItem(SYNCHRONIZE_CLOCK, "Synchronize Clock"));
@@ -115,6 +117,10 @@ public class ActionsList extends ListView
 				{
 					case SHOW_KEYBOARD:
 						activity.ShowKeyboard();
+						activity.HideActions();
+						break;
+					case SEND_ON_KEY_PRESS:
+						activity.SendOnKeyPress();
 						activity.HideActions();
 						break;
 					case INSTALL_APPS:
