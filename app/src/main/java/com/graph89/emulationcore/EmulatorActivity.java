@@ -558,6 +558,15 @@ public class EmulatorActivity extends Graph89ActivityBase
 		}
 	}
 
+	public void SendOnKeyPress()
+	{
+		if (view != null) {
+			Log.i("Graph89", "Send Break (ON Key Press)");
+			nativeSendKey(CurrentSkin.CalculatorInfo.OnKey, 1);
+			view.postDelayed(() -> nativeSendKey(CurrentSkin.CalculatorInfo.OnKey, 0), 500);
+		}
+	}
+
 	public void ShowKeyboard()
 	{
 		if (!InitComplete) return;
