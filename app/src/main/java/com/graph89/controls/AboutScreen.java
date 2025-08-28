@@ -49,7 +49,8 @@ public class AboutScreen
 		// @formatter:off
 		String text = "Graph 89 - Version: " + BuildConfig.VERSION_NAME + "\n\n" +
 				"Copyright \u00A9 2012-2013, Dritan Hashorva\n" +
-				"Copyright \u00A9 2021, Micha LaQua\n\n\n" +
+				"Copyright \u00A9 2021, Micha LaQua\n" +
+				"Copyright \u00A9 2024-2025, E. Anema\n\n\n" +
 
 				"TiEmu - Version: 3.0.3\n\n" +
 				"Copyright \u00A9 2000-2001, Thomas Corvazier, Romain Lievin\n" + 

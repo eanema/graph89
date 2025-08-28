@@ -6,8 +6,9 @@ android {
         applicationId "com.eanema.graph89"
         minSdkVersion 19
         targetSdkVersion 34
-        versionCode 1108
-        versionName "1.1.8"
+        // with version update also update the copyright year in the about dialog, controls/AboutScreen.java
+        versionCode 1109
+        versionName "1.1.9"
         ndk {
             // TODO: Fix 64-bit ABIs
             abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
