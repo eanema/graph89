@@ -1,3 +1,5 @@
+> **_NOTE:_**  This repo is not actively maintained. Unfortunately I do not have time in my life at the moment to devote to development or bug fixes. What I *can* do is manage the repo and F-Droid build. So, if there are any features or bug fixes that you would like included, please generate a well-documented, quality pull request for my review, and I will very likely include the new feature/fix in the repo and tag a new releae for F-Droid. 
+
 # Graph 89
 
 Graph89 is an emulator targeting the Android platform for TI89, TI89T, TI92, TI92+, V200, TI84+, TI84+SE, TI83, TI83+ and TI83+SE calculators.
