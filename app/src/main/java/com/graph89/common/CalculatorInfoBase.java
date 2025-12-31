@@ -25,4 +25,5 @@ public abstract class CalculatorInfoBase
 	public int ScreenWidth = 0;
 	public int ScreenHeight = 0;
 	public int OnKey = -1;
+	public int SecondKey = -1;  // -1 indicates no 2nd key support
 }

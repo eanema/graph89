@@ -1,6 +1,6 @@
 /*
  *   Graph89 - Emulator for Android
- *  
+ *
  *	 Copyright (C) 2012-2013  Dritan Hashorva
  *
  *   This program is free software: you can redistribute it and/or modify
@@ -20,20 +20,63 @@
 package com.graph89.emulationcore;
 
 import java.io.IOException;
+import java.util.List;
 
+import com.graph89.common.ConfigurationHelper;
+import com.graph89.common.HighlightInfo;
 import com.graph89.common.KeyPress;
 import com.graph89.common.Util;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.AttributeSet;
+import android.util.SparseArray;
+import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
 
 public class EmulatorView extends View implements OnTouchListener
 {
+	/**
+	 * Tracks touch state for gesture detection.
+	 * Each active touch has its own tracker to support multi-touch.
+	 */
+	private static class TouchTracker
+	{
+		int pointerId;           // MotionEvent pointer ID
+		float startX, startY;    // Initial touch position
+		int startKeyCode;        // Key code at touch start
+		float swipeThreshold;    // Vertical distance needed for swipe detection
+		boolean isSwipeDetected; // True if upward swipe detected
+		boolean longPressMode;   // True if timeout fired (long-press activated)
+		Runnable longPressRunnable; // Timeout callback reference for cancellation
+
+		TouchTracker(int pointerId, float x, float y, int keyCode, float threshold)
+		{
+			this.pointerId = pointerId;
+			this.startX = x;
+			this.startY = y;
+			this.startKeyCode = keyCode;
+			this.swipeThreshold = threshold;
+			this.isSwipeDetected = false;
+			this.longPressMode = false;
+			this.longPressRunnable = null;
+		}
+	}
+
 	private EmulatorActivity	mContext	= null;
+
+	// Gesture detection state
+	private SparseArray<TouchTracker> mActiveTouches = new SparseArray<>();
+	private Handler mLongPressHandler = new Handler(Looper.getMainLooper());
+
+	// Constants
+	private static final float DEFAULT_BUTTON_HEIGHT = 50.0f;  // Default button height
+	private static final float SWIPE_THRESHOLD_RATIO = 0.5f;   // Threshold ratio (50%)
+	private static final long LONG_PRESS_TIMEOUT = 300;  // 300ms timeout
 
 	public EmulatorView(Context context)
 	{
@@ -91,6 +134,53 @@ public class EmulatorView extends View implements OnTouchListener
 		}
 	}
 
+	/**
+	 * Calculate button height for swipe threshold calculation.
+	 * Uses calculator skin's button layout information.
+	 * @param keyCode The key code to get height for
+	 * @return Button height in pixels
+	 */
+	private float calculateButtonHeight(int keyCode)
+	{
+		// Try to get button height from highlight info
+		if (EmulatorActivity.CurrentSkin.ButtonHighlights != null) {
+			List<HighlightInfo> highlights =
+				EmulatorActivity.CurrentSkin.ButtonHighlights.FindHighlightInfoByKeyCode(keyCode);
+
+			if (highlights != null && !highlights.isEmpty()) {
+				HighlightInfo info = highlights.get(0);
+				if (info.ButtonType != null) {
+					return info.ButtonType.Height;
+				}
+			}
+		}
+
+		// Fallback: use default value
+		return DEFAULT_BUTTON_HEIGHT;
+	}
+
+	/**
+	 * Detect if current touch movement constitutes an upward swipe.
+	 *
+	 * @param tracker The touch tracker with start position
+	 * @param currentX Current X coordinate
+	 * @param currentY Current Y coordinate
+	 * @return true if upward swipe detected (vertical distance > threshold AND vertical > horizontal)
+	 */
+	private boolean isSwipeUpGesture(TouchTracker tracker, float currentX, float currentY)
+	{
+		float deltaY = tracker.startY - currentY;  // Positive = upward swipe
+		float deltaX = Math.abs(currentX - tracker.startX);
+
+		// Condition 1: Upward movement exceeds threshold
+		if (deltaY < tracker.swipeThreshold) {
+			return false;
+		}
+
+		// Condition 2: Movement is more vertical than horizontal
+		return deltaY > deltaX;
+	}
+
 	@Override
 	public boolean onTouch(View v, MotionEvent event)
 	{
@@ -108,7 +198,7 @@ public class EmulatorView extends View implements OnTouchListener
 
 			case MotionEvent.ACTION_DOWN:
 			case MotionEvent.ACTION_POINTER_DOWN:
-
+				// Preserve existing landscape screen swap logic
 				if (EmulatorActivity.CurrentSkin instanceof LandscapeSkin)
 				{
 					if (EmulatorActivity.CurrentSkin.IsKeypressInScreen(x, y) || EmulatorActivity.CurrentSkin.IsFull)
@@ -117,20 +207,151 @@ public class EmulatorView extends View implements OnTouchListener
 						return true;
 					}
 				}
+
 				KeyPress key = EmulatorActivity.CurrentSkin.GetKeypress(x, y);
 				if (key != null)
 				{
+					// Check if swipe gesture is enabled
+					boolean swipeEnabled = ConfigurationHelper.getBoolean(
+						getContext(),
+						ConfigurationHelper.CONF_KEY_SWIPE_GESTURE_ENABLED,
+						ConfigurationHelper.CONF_DEFAULT_SWIPE_GESTURE_ENABLED
+					);
+
+					if (!swipeEnabled)
+					{
+						// Direct dispatch when gesture disabled
+						key.TouchID = pointerID;
+						ButtonState.ButtonPress(key);
+						this.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+						break;
+					}
+
+					// Calculate button height and swipe threshold
+					float buttonHeight = calculateButtonHeight(key.KeyCode);
+					float swipeThreshold = buttonHeight * SWIPE_THRESHOLD_RATIO;
+
+					// Create touch tracker
+					TouchTracker tracker = new TouchTracker(
+						pointerID, x, y, key.KeyCode, swipeThreshold
+					);
+					mActiveTouches.put(pointerID, tracker);
+
+					// Use ButtonPressVisualOnly() - visual highlight only
 					key.TouchID = pointerID;
-					ButtonState.ButtonPress(key);
+					ButtonState.ButtonPressVisualOnly(key);
+
+					// Trigger full feedback (haptic + acoustic)
+					EmulatorActivity.TriggerFeedback();
+
+					// Create and start long-press timeout timer
+					final TouchTracker finalTracker = tracker;
+					tracker.longPressRunnable = new Runnable()
+					{
+						@Override
+						public void run()
+						{
+							// Timeout fired: enter long-press mode, send key press
+							finalTracker.longPressMode = true;
+							EmulatorActivity.SendKeyToCalc(finalTracker.startKeyCode, 1, false);
+						}
+					};
+					mLongPressHandler.postDelayed(tracker.longPressRunnable, LONG_PRESS_TIMEOUT);
 				}
 				break;
-			case MotionEvent.ACTION_UP:
-			case MotionEvent.ACTION_POINTER_UP:
-				ButtonState.ButtonUnpress(pointerID);
+
+			case MotionEvent.ACTION_MOVE:
+				// Process all active touch points
+				for (int i = 0; i < event.getPointerCount(); i++) {
+					int pid = event.getPointerId(i);
+					TouchTracker tracker = mActiveTouches.get(pid);
+
+					// Skip untracked or already-detected touches
+					if (tracker == null || tracker.isSwipeDetected) {
+						continue;
+					}
+
+					float currentX = event.getX(i);
+					float currentY = event.getY(i);
+
+					// Detect swipe gesture, mark only (don't send yet)
+					if (isSwipeUpGesture(tracker, currentX, currentY)) {
+						tracker.isSwipeDetected = true;
+
+						// Swipe detected, cancel long-press timer
+						if (tracker.longPressRunnable != null) {
+							mLongPressHandler.removeCallbacks(tracker.longPressRunnable);
+							tracker.longPressRunnable = null;
+						}
+					}
+				}
 				break;
 
+			case MotionEvent.ACTION_UP:
+			case MotionEvent.ACTION_POINTER_UP:
+			{
+				TouchTracker tracker = mActiveTouches.get(pointerID);
+
+				if (tracker != null) {
+					int keyCode = tracker.startKeyCode;
+
+					// Cancel timer first (if still running)
+					if (tracker.longPressRunnable != null) {
+						mLongPressHandler.removeCallbacks(tracker.longPressRunnable);
+						tracker.longPressRunnable = null;
+					}
+
+					// Remove visual highlight
+					ButtonState.ButtonUnpressVisualOnly(pointerID);
+
+					// Handle different modes
+					if (tracker.longPressMode) {
+						// Long-press mode: only send release (press already sent in timeout)
+						EmulatorActivity.SendKeyToCalc(keyCode, 0, false);
+					} else {
+						// Quick tap or swipe mode
+
+						// Detect if this is ON key (EMU button)
+						boolean isOnKey = (EmulatorActivity.CurrentSkin != null &&
+										   EmulatorActivity.CurrentSkin.CalculatorInfo != null &&
+										   keyCode == EmulatorActivity.CurrentSkin.CalculatorInfo.OnKey);
+
+						if (isOnKey) {
+							// ON key special handling
+							EmulatorActivity.SendKeyToCalc(keyCode, 0, false);
+						} else if (tracker.isSwipeDetected) {
+							// Swipe gesture: send 2nd + key combination
+							// *** NEW: Trigger 2nd key visual feedback ***
+							ButtonState.ButtonPress2ndVisualFeedback();
+
+							// Dynamically get current calculator's 2nd key code
+							int secondKey = (EmulatorActivity.CurrentSkin != null &&
+											 EmulatorActivity.CurrentSkin.CalculatorInfo != null)
+											? EmulatorActivity.CurrentSkin.CalculatorInfo.SecondKey
+											: 7;  // Default value (TI-89)
+							int[] comboKeys = {secondKey, keyCode};
+							EmulatorActivity.SendKeysToCalc(comboKeys);
+						} else {
+							// Normal tap: send normal key (press+release)
+							int[] normalKey = {keyCode};
+							EmulatorActivity.SendKeysToCalc(normalKey);
+						}
+					}
+
+					// Cleanup tracker
+					mActiveTouches.remove(pointerID);
+				} else {
+					// No tracker: was a bypassed touch (gesture disabled)
+					// Release handled by traditional ButtonState.ButtonUnpress()
+					ButtonState.ButtonUnpress(pointerID);
+				}
+				break;
+			}
+
 			case MotionEvent.ACTION_CANCEL:
-				ButtonState.UnpressAll();
+				// Clean up all touch trackers
+				mActiveTouches.clear();
+				// Don't call ButtonState.UnpressAll() - we never called ButtonState.ButtonPress()
 				break;
 		}
 

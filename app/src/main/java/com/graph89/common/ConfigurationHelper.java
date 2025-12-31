@@ -34,12 +34,14 @@ public class ConfigurationHelper
 	public static final String CONF_KEY_HAPTIC_FEEDBACK = "haptic_feedback";
 	public static final String CONF_KEY_AUDIO_FEEDBACK = "audio_feedback";
 	public static final String CONF_KEY_UNIQUE_ID = "unique_id";
+	public static final String CONF_KEY_SWIPE_GESTURE_ENABLED = "swipe_gesture_enabled";
 
 	public static final boolean CONF_DEFAULT_HIDE_STATUSBAR = false;
 	public static final boolean CONF_DEFAULT_KEEP_SCREEN_ON = false;
 	public static final int CONF_DEFAULT_AUTO_OFF = 5;
 	public static final boolean CONF_DEFAULT_HAPTIC_FEEDBACK = true;
 	public static final boolean CONF_DEFAULT_AUDIO_FEEDBACK = false;
+	public static final boolean CONF_DEFAULT_SWIPE_GESTURE_ENABLED = true;
 
 	private static SharedPreferences getSharedPrefs(Context context) {
 		return context.getSharedPreferences(ConfigurationName, Context.MODE_PRIVATE);

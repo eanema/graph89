@@ -44,4 +44,15 @@
         android:summary="Make a click sound on key press"
         android:title="Acoustic Feedback" />
 
+    <PreferenceCategory
+        android:key="gesture_settings_category"
+        android:title="Gesture Settings" >
+    </PreferenceCategory>
+
+    <CheckBoxPreference
+        android:key="swipe_gesture_enabled"
+        android:title="Swipe for 2nd Key"
+        android:summary="Swipe up on buttons to trigger 2nd key combinations"
+        android:defaultValue="true" />
+
 </PreferenceScreen>

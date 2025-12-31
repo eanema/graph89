@@ -5,6 +5,7 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.PreferenceActivity;
+import android.preference.PreferenceCategory;
 
 import com.eanema.graph89.R;
 import com.graph89.common.ConfigurationHelper;
@@ -18,6 +19,7 @@ public class GlobalConfigurationPage extends PreferenceActivity implements OnSha
 	private SeekBarPreference mPrefAutoOff;
 	private CheckBoxPreference mPrefHapticFeedback;
 	private CheckBoxPreference mPrefAudioFeedback;
+	private CheckBoxPreference mSwipeGestureEnabled;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -71,6 +73,28 @@ public class GlobalConfigurationPage extends PreferenceActivity implements OnSha
 		mPrefAudioFeedback = (CheckBoxPreference) findPreference(ConfigurationHelper.CONF_KEY_AUDIO_FEEDBACK);
 		mPrefAudioFeedback.setChecked(ConfigurationHelper.getBoolean(this,
 				ConfigurationHelper.CONF_KEY_AUDIO_FEEDBACK, ConfigurationHelper.CONF_DEFAULT_AUDIO_FEEDBACK));
+
+		// Initialize gesture preferences
+		mSwipeGestureEnabled = (CheckBoxPreference) findPreference(
+				ConfigurationHelper.CONF_KEY_SWIPE_GESTURE_ENABLED);
+		if (mSwipeGestureEnabled != null) {
+			mSwipeGestureEnabled.setChecked(ConfigurationHelper.getBoolean(this,
+					ConfigurationHelper.CONF_KEY_SWIPE_GESTURE_ENABLED,
+					ConfigurationHelper.CONF_DEFAULT_SWIPE_GESTURE_ENABLED));
+		}
+
+		// Hide gesture settings if calculator doesn't support 2nd key
+		if (EmulatorActivity.CurrentSkin != null &&
+			EmulatorActivity.CurrentSkin.CalculatorInfo != null) {
+			int secondKey = EmulatorActivity.CurrentSkin.CalculatorInfo.SecondKey;
+			if (secondKey == -1) {
+				PreferenceCategory gestureCategory =
+					(PreferenceCategory) findPreference("gesture_settings_category");
+				if (gestureCategory != null) {
+					getPreferenceScreen().removePreference(gestureCategory);
+				}
+			}
+		}
 	}
 
 	@Override
@@ -90,6 +114,11 @@ public class GlobalConfigurationPage extends PreferenceActivity implements OnSha
 		} else if (key.equals(mPrefAudioFeedback.getKey())) {
 			ConfigurationHelper.writeBoolean(this, ConfigurationHelper.CONF_KEY_AUDIO_FEEDBACK,
 					mPrefAudioFeedback.isChecked());
+		}
+		// Gesture configuration changes
+		else if (mSwipeGestureEnabled != null && key.equals(mSwipeGestureEnabled.getKey())) {
+			ConfigurationHelper.writeBoolean(this, ConfigurationHelper.CONF_KEY_SWIPE_GESTURE_ENABLED,
+					mSwipeGestureEnabled.isChecked());
 		}
 	}
 }

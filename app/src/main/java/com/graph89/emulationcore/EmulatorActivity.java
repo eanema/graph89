@@ -540,6 +540,19 @@ public class EmulatorActivity extends Graph89ActivityBase
 		}
 	}
 
+	public static void TriggerFeedback()
+	{
+		// Trigger haptic feedback
+		if (view != null && hapticFeedback) {
+			view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+		}
+
+		// Trigger acoustic feedback
+		if (audioManager != null && audioFeedback) {
+			audioManager.playSoundEffect(SoundEffectConstants.CLICK, 1.0f);
+		}
+	}
+
 	public static void SendKeysToCalc(int[] keys)
 	{
 		if (IsEmulating)
