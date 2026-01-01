@@ -27,5 +27,6 @@ public class CalculatorInfoTI89 extends CalculatorInfoBase
 		ScreenHeight = 100;
 		OnKey = 78;
 		SecondKey = 7;
+		AlphaKey = 79;
 	}
 }

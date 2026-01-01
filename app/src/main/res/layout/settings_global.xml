@@ -51,8 +51,8 @@
 
     <CheckBoxPreference
         android:key="swipe_gesture_enabled"
-        android:title="Swipe for 2nd Key"
-        android:summary="Swipe up on buttons to trigger 2nd key combinations"
+        android:title="Swipe for Alt Key Functions"
+        android:summary="Swipe up on buttons to trigger 2nd key combinations and swipe down on buttons to trigger alpha key combinations"
         android:defaultValue="true" />
 
 </PreferenceScreen>

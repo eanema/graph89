@@ -87,7 +87,8 @@ public class GlobalConfigurationPage extends PreferenceActivity implements OnSha
 		if (EmulatorActivity.CurrentSkin != null &&
 			EmulatorActivity.CurrentSkin.CalculatorInfo != null) {
 			int secondKey = EmulatorActivity.CurrentSkin.CalculatorInfo.SecondKey;
-			if (secondKey == -1) {
+			int alphaKey = EmulatorActivity.CurrentSkin.CalculatorInfo.AlphaKey;
+			if ((secondKey == -1) && (alphaKey == -1)) {
 				PreferenceCategory gestureCategory =
 					(PreferenceCategory) findPreference("gesture_settings_category");
 				if (gestureCategory != null) {

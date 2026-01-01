@@ -50,7 +50,8 @@ public class EmulatorView extends View implements OnTouchListener
 		float startX, startY;    // Initial touch position
 		int startKeyCode;        // Key code at touch start
 		float swipeThreshold;    // Vertical distance needed for swipe detection
-		boolean isSwipeDetected; // True if upward swipe detected
+		boolean isUpSwipeDetected; // True if upward swipe detected
+		boolean isDownSwipeDetected; // True if downward swipe detected
 		boolean longPressMode;   // True if timeout fired (long-press activated)
 		Runnable longPressRunnable; // Timeout callback reference for cancellation
 
@@ -61,7 +62,8 @@ public class EmulatorView extends View implements OnTouchListener
 			this.startY = y;
 			this.startKeyCode = keyCode;
 			this.swipeThreshold = threshold;
-			this.isSwipeDetected = false;
+			this.isUpSwipeDetected = false;
+			this.isDownSwipeDetected = false;
 			this.longPressMode = false;
 			this.longPressRunnable = null;
 		}
@@ -181,6 +183,28 @@ public class EmulatorView extends View implements OnTouchListener
 		return deltaY > deltaX;
 	}
 
+	/**
+	 * Detect if current touch movement constitutes an downward swipe.
+	 *
+	 * @param tracker The touch tracker with start position
+	 * @param currentX Current X coordinate
+	 * @param currentY Current Y coordinate
+	 * @return true if downward swipe detected (vertical distance > threshold AND vertical > horizontal)
+	 */
+	private boolean isSwipeDownGesture(TouchTracker tracker, float currentX, float currentY)
+	{
+		float deltaY = tracker.startY - currentY;  // Positive = upward swipe, negative = downward swipe
+		float deltaX = Math.abs(currentX - tracker.startX);
+
+		// Condition 1: Upward movement exceeds threshold
+		if (-deltaY < tracker.swipeThreshold) {
+			return false;
+		}
+
+		// Condition 2: Movement is more vertical than horizontal
+		return -deltaY > deltaX;
+	}
+
 	@Override
 	public boolean onTouch(View v, MotionEvent event)
 	{
@@ -267,16 +291,27 @@ public class EmulatorView extends View implements OnTouchListener
 					TouchTracker tracker = mActiveTouches.get(pid);
 
 					// Skip untracked or already-detected touches
-					if (tracker == null || tracker.isSwipeDetected) {
+					if (tracker == null || tracker.isUpSwipeDetected || tracker.isDownSwipeDetected) {
 						continue;
 					}
 
 					float currentX = event.getX(i);
 					float currentY = event.getY(i);
 
-					// Detect swipe gesture, mark only (don't send yet)
+					// Detect up swipe gesture, mark only (don't send yet)
 					if (isSwipeUpGesture(tracker, currentX, currentY)) {
-						tracker.isSwipeDetected = true;
+						tracker.isUpSwipeDetected = true;
+
+						// Swipe detected, cancel long-press timer
+ 						if (tracker.longPressRunnable != null) {
+							mLongPressHandler.removeCallbacks(tracker.longPressRunnable);
+							tracker.longPressRunnable = null;
+						}
+					}
+
+					// Detect down swipe gesture, mark only (don't send yet)
+					if (isSwipeDownGesture(tracker, currentX, currentY)) {
+						tracker.isDownSwipeDetected = true;
 
 						// Swipe detected, cancel long-press timer
 						if (tracker.longPressRunnable != null) {
@@ -319,7 +354,7 @@ public class EmulatorView extends View implements OnTouchListener
 						if (isOnKey) {
 							// ON key special handling
 							EmulatorActivity.SendKeyToCalc(keyCode, 0, false);
-						} else if (tracker.isSwipeDetected) {
+						} else if (tracker.isUpSwipeDetected) {
 							// Swipe gesture: send 2nd + key combination
 							// *** NEW: Trigger 2nd key visual feedback ***
 							ButtonState.ButtonPress2ndVisualFeedback();
@@ -330,6 +365,18 @@ public class EmulatorView extends View implements OnTouchListener
 											? EmulatorActivity.CurrentSkin.CalculatorInfo.SecondKey
 											: 7;  // Default value (TI-89)
 							int[] comboKeys = {secondKey, keyCode};
+							EmulatorActivity.SendKeysToCalc(comboKeys);
+						} else if (tracker.isDownSwipeDetected) {
+							// Swipe gesture: send alpha + key combination
+							// *** NEW: Trigger alpha key visual feedback ***
+							ButtonState.ButtonPressAlphaVisualFeedback();
+
+							// Dynamically get current calculator's alpha key code
+							int alphaKey = (EmulatorActivity.CurrentSkin != null &&
+											 EmulatorActivity.CurrentSkin.CalculatorInfo != null)
+											? EmulatorActivity.CurrentSkin.CalculatorInfo.AlphaKey
+											: 79;  // Default value (TI-89)
+							int[] comboKeys = {alphaKey, keyCode};
 							EmulatorActivity.SendKeysToCalc(comboKeys);
 						} else {
 							// Normal tap: send normal key (press+release)

@@ -128,6 +128,41 @@ public class ButtonState
 		}
 	}
 
+    /**
+     * Briefly highlight selected key to provide visual confirmation when
+     * swipe gesture triggers a 2nd/alpha key combination. The highlight
+     * lasts 100ms and then auto-removes.
+     */
+    public static void sendButtonPressAndRelease(int key) {
+        // Get key coordinates from highlight info
+        List<HighlightInfo> highlights = EmulatorActivity.CurrentSkin.ButtonHighlights.FindHighlightInfoByKeyCode(key);
+        if (highlights == null || highlights.isEmpty()) return;
+
+        HighlightInfo info = highlights.get(0);
+
+        // Create temporary visual press with special touchID and coordinates
+        final int TEMP_TOUCH_ID = -999;
+        KeyPress tempPress = new KeyPress();
+        tempPress.KeyCode = key;
+        tempPress.TouchID = TEMP_TOUCH_ID;
+        tempPress.X = info.CenterX;
+        tempPress.Y = info.CenterY;
+        ButtonPressVisualOnly(tempPress);
+
+        // Trigger full feedback (haptic + acoustic) to match direct key press
+        EmulatorActivity.TriggerFeedback();
+
+        // Auto-remove after 100ms (use shared Handler instance)
+        sHandler.postDelayed(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                ButtonUnpressVisualOnly(TEMP_TOUCH_ID);
+            }
+        }, 100);
+    }
+
 	/**
 	 * Briefly highlight 2nd key to provide visual confirmation when
 	 * swipe gesture triggers a 2nd key combination. The highlight
@@ -140,33 +175,22 @@ public class ButtonState
 		int secondKey = EmulatorActivity.CurrentSkin.CalculatorInfo.SecondKey;
 		if (secondKey == -1) return;
 
-		// Get 2nd key coordinates from highlight info
-		List<HighlightInfo> highlights = EmulatorActivity.CurrentSkin.ButtonHighlights.FindHighlightInfoByKeyCode(secondKey);
-		if (highlights == null || highlights.isEmpty()) return;
+        sendButtonPressAndRelease(secondKey);
+	}
 
-		HighlightInfo info = highlights.get(0);
+	/**
+	 * Briefly highlight Alpha key to provide visual confirmation when
+	 * swipe gesture triggers a Alpha key combination. The highlight
+	 * lasts 100ms and then auto-removes.
+	 */
+	public static void ButtonPressAlphaVisualFeedback()
+	{
+		if (EmulatorActivity.CurrentSkin == null || EmulatorActivity.CurrentSkin.CalculatorInfo == null) return;
 
-		// Create temporary visual press with special touchID and coordinates
-		final int TEMP_TOUCH_ID = -999;
-		KeyPress tempPress = new KeyPress();
-		tempPress.KeyCode = secondKey;
-		tempPress.TouchID = TEMP_TOUCH_ID;
-		tempPress.X = info.CenterX;
-		tempPress.Y = info.CenterY;
-		ButtonPressVisualOnly(tempPress);
+		int alphaKey = EmulatorActivity.CurrentSkin.CalculatorInfo.AlphaKey;
+		if (alphaKey == -1) return;
 
-		// Trigger full feedback (haptic + acoustic) to match direct 2nd key press
-		EmulatorActivity.TriggerFeedback();
-
-		// Auto-remove after 100ms (use shared Handler instance)
-		sHandler.postDelayed(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				ButtonUnpressVisualOnly(TEMP_TOUCH_ID);
-			}
-		}, 100);
+		sendButtonPressAndRelease(alphaKey);
 	}
 
 	public static void UnpressAll()
