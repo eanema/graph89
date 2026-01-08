@@ -175,7 +175,7 @@ public class ButtonState
 		int secondKey = EmulatorActivity.CurrentSkin.CalculatorInfo.SecondKey;
 		if (secondKey == -1) return;
 
-        sendButtonPressAndRelease(secondKey);
+		sendButtonPressAndRelease(secondKey);
 	}
 
 	/**

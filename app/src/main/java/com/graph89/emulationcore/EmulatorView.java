@@ -184,7 +184,7 @@ public class EmulatorView extends View implements OnTouchListener
 	}
 
 	/**
-	 * Detect if current touch movement constitutes an downward swipe.
+	 * Detect if current touch movement constitutes a downward swipe.
 	 *
 	 * @param tracker The touch tracker with start position
 	 * @param currentX Current X coordinate

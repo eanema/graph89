@@ -34,7 +34,7 @@
     <CheckBoxPreference
         android:defaultValue="true"
         android:key="haptic_feedback"
-        android:summary="Key vibration"
+        android:summary="Enable key vibration. Note that touch interactions/touch feedback/haptic feedback must be enabled in Android system settings for Graph89 to generate haptic feedback."
         android:title="Haptic Feedback" />
 
 
