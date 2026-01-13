@@ -232,14 +232,8 @@ public class TIEmuThread extends EmulatorThread implements Runnable
 
 					if (turbo && !IsSleeping)
 					{
-						// run it in a loop.
-						//one iteration takes 4ms
-						for (int i = 0; i < 30 && KillFlag == false && skin.Screen.isBusy(); ++i)
-						{
-							EmulatorActivity.nativeTiEmuRunEngine();
-						}
-
-						Thread.sleep(1);
+						// ensure busy status is up to date
+						skin.Screen.refresh();
 					}
 					else
 					{

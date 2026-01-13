@@ -54,8 +54,8 @@ public class EmulatorScreen
 	public int							mRawScreenHeight		= 0;
 	private Paint						mDrawingPaint			= null;
 
-	private boolean						isBusy					= false;
-	private boolean						isScreenOff				= false;
+	private volatile boolean			isBusy					= false;
+	private volatile boolean			isScreenOff				= false;
 	public int							CRC						= 0;
 	private int							cntr					= 0;
 
